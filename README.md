@@ -1,4 +1,4 @@
-# Avae.Linux.Essentials
+# Avae.Windows.Essentials
 
 A port of Microsoft.Maui.Essentials tailored for Avalonia.Windows.
 
