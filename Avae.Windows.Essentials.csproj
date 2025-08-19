@@ -6,6 +6,15 @@
     <Nullable>enable</Nullable>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <PackageId>Avae.Windows.Essentials</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>cedricb</Authors>
+    <Product>Avae.Windows.Essentials</Product>
+    <Description>Portage of Microsoft.Maui.Essentials for Windows</Description>
+    <PackageTags>maui;avalonia;essentials;crossplatform</PackageTags>
+    <RepositoryUrl>https://github.com/cedric56/Avae.Windows.Essentials</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/cedric56/Avae.Windows.Essentials</PackageProjectUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageLicenseFile>Licence.md</PackageLicenseFile>
     <AssemblyName>Microsoft.Maui.Essentials</AssemblyName>
     <RootNamespace>Microsoft.Maui.Essentials</RootNamespace>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
