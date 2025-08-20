@@ -1,95 +1,77 @@
 using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Media.Imaging;
 using Microsoft.Maui.ApplicationModel;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.Graphics.Imaging;
-using Windows.Storage.Streams;
 
 namespace Microsoft.Maui.Media
 {
 	partial class ScreenshotImplementation : IPlatformScreenshot, IScreenshot
 	{
-		public bool IsCaptureSupported =>
-			true;
+        public bool IsCaptureSupported =>
+          true;
 
-		public Task<IScreenshotResult> CaptureAsync()
-		{
-			var element = WindowStateManager.Default.GetActiveWindow(true);
+        public Task<IScreenshotResult> CaptureAsync(Window window)
+        {
+            IScreenshotResult result = new ScreenshotResult(window);
+            return Task.FromResult(result);
+        }
 
-			return CaptureAsync(element);
-		}
+        public Task<IScreenshotResult?> CaptureAsync(Visual element)
+        {
+            IScreenshotResult result = new ScreenshotResult(element);
+            return Task.FromResult(result);
+        }
 
-		public Task<IScreenshotResult> CaptureAsync(Avalonia.Controls.Window window) =>
-			CaptureAsync(window.Content as Visual);
+        public Task<IScreenshotResult> CaptureAsync()
+        {
+            IScreenshotResult result = new ScreenshotResult(WindowStateManager.Default.GetActiveWindow(false));
+            return Task.FromResult(result);
+        }
 
-		public async Task<IScreenshotResult> CaptureAsync(Visual element)
-		{
-			var bmp = new Avalonia.Media.Imaging.RenderTargetBitmap(new PixelSize((int)element.Bounds.Width, (int)element.Bounds.Height));
+        public static Task<MemoryStream> CaptureToStreamAsync(Visual visual, ScreenshotFormat format, int quality)
+        {
+            var pixelSize = new PixelSize((int)visual.Bounds.Width, (int)visual.Bounds.Height);
+            var dpi = new Vector(96, 96);
+            var bitmap = new RenderTargetBitmap(pixelSize, dpi);
 
-			// NOTE: Return to the main thread so we can access view properties such as
-			//       width and height. Do not ConfigureAwait!
-			bmp.Render(element);
+            bitmap.Render(visual);
 
-			using var ms = new MemoryStream() ;
-            bmp.Save(ms); // saves as PNG
-			return new ScreenshotResult((int)element.Bounds.Width, (int)element.Bounds.Height, ms.ToArray(), 96, 96);
-		}
-	}
+            var stream = new MemoryStream();
+            switch (format)
+            {
+                case ScreenshotFormat.Png:
+                    bitmap.Save(stream, quality);
+                    break;
+                default:
+                    throw new NotSupportedException("Unsupported format.");
+            }
 
-	partial class ScreenshotResult
-	{
-		readonly double _dpiX;
-		readonly double _dpiY;
-		readonly byte[] _bytes;
+            stream.Position = 0;
+            return Task.FromResult(stream);
+        }
 
-		internal ScreenshotResult(int width, int height, byte[] bytes, double dpiX, double dpiY)
-		{
-			Width = width;
-			Height = height;
-			_bytes = bytes;
-			_dpiX = dpiX;
-			_dpiY = dpiY;
-		}
+        
+    }
 
-		public ScreenshotResult(int width, int height, IBuffer pixels)
-		{
-			Width = width;
-			Height = height;
-			_bytes = pixels.ToArray() ?? throw new ArgumentNullException(nameof(pixels));
-			_dpiX = 96;
-			_dpiY = 96;
-		}
+    partial class ScreenshotResult : IScreenshotResult
+    {
+        Visual visual;
 
-		async Task<Stream> PlatformOpenReadAsync(ScreenshotFormat format, int quality)
-		{
-			var ms = new InMemoryRandomAccessStream();
-			await EncodeAsync(format, ms).ConfigureAwait(false);
-			return ms.AsStreamForRead();
-		}
+        internal ScreenshotResult(Visual visual)
+        {
+            Height = (int)visual.Bounds.Height;
+            Width = (int)visual.Bounds.Width;
 
-		Task PlatformCopyToAsync(Stream destination, ScreenshotFormat format, int quality)
-		{
-			var ms = destination.AsRandomAccessStream();
-			return EncodeAsync(format, ms);
-		}
+            this.visual = visual;
+        }
 
-		Task<byte[]> PlatformToPixelBufferAsync() =>
-			Task.FromResult(_bytes);
+        async Task<Stream> PlatformOpenReadAsync(ScreenshotFormat format, int quality) =>
+            await ScreenshotImplementation.CaptureToStreamAsync(visual, format, quality);
 
-		async Task EncodeAsync(ScreenshotFormat format, IRandomAccessStream ms)
-		{
-			var f = ToBitmapEncoder(format);
-
-			var encoder = await BitmapEncoder.CreateAsync(f, ms).AsTask().ConfigureAwait(false);
-			encoder.SetPixelData(BitmapPixelFormat.Bgra8, BitmapAlphaMode.Ignore, (uint)Width, (uint)Height, _dpiX, _dpiY, _bytes);
-			await encoder.FlushAsync().AsTask().ConfigureAwait(false);
-		}
-
-		static Guid ToBitmapEncoder(ScreenshotFormat format) =>
-			format switch
-			{
-				ScreenshotFormat.Jpeg => BitmapEncoder.JpegEncoderId,
-				ScreenshotFormat.Png => BitmapEncoder.PngEncoderId,
-				_ => throw new ArgumentOutOfRangeException(nameof(format))
-			};
-	}
+        public async Task PlatformCopyToAsync(Stream destination, ScreenshotFormat format, int quality)
+        {
+            var sourceStream = await PlatformOpenReadAsync(format, quality);
+            await sourceStream.CopyToAsync(destination);
+        }
+    }
 }

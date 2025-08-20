@@ -1,6 +1,9 @@
 using Avalonia.Controls;
 using Avalonia.Platform;
+using Microsoft.Maui.Storage;
+using System.Diagnostics;
 using System.Text;
+using Windows.Storage;
 using Windows.UI.StartScreen;
 
 namespace Microsoft.Maui.ApplicationModel
@@ -87,51 +90,7 @@ namespace Microsoft.Maui.ApplicationModel
 
 				try
 				{
-                    //string logoPath = action.Icon.TrimStart('/', '\\').Replace("\\", "/");
-
-                    // Check if the path is already an absolute URI
-      //              if (Uri.IsWellFormedUriString(logoPath, UriKind.Absolute))
-      //              {
-      //                  item.Logo = new Uri(logoPath, UriKind.Absolute);
-      //              }
-      //              else
-      //              {
-      //                  // Construct avares:// URI for embedded resource
-      //                  string assemblyName = System.Reflection.Assembly.GetEntryAssembly().GetName().Name;
-      //                  string resourcePath = $"ms-appx:///{assemblyName}/{logoPath}";
-
-      //                  // Validate URI format
-      //                  if (!Uri.IsWellFormedUriString(resourcePath, UriKind.Absolute))
-      //                  {
-      //                      throw new UriFormatException($"Constructed URI is invalid: {resourcePath}");
-      //                  }
-
-						//// Attempt to verify resource existence (optional, for debugging)
-						////var resourceStream = System.Reflection.Assembly.GetEntryAssembly()
-						////    .GetManifestResourceStream($"{assemblyName}.{logoPath.Replace("/", ".")}");
-						////if (resourceStream == null)
-						////{
-						////    throw new InvalidOperationException($"Resource not found: {logoPath}");
-						////}
-
-						//var stream = AssetLoader.GetAssets(new Uri(resourcePath), null);
-
-
-						item.Logo = new Uri($"ms-appx:///{action.Icon}");							
-                    //}
-
-                    //string logoPath = action.Icon;
-
-                    //// If action.Icon is a relative path, prepend the appropriate scheme
-                    //if (!Uri.IsWellFormedUriString(logoPath, UriKind.Absolute))
-                    //{
-                    //    // Assuming the logo is a resource in the app package
-                    //    logoPath = $"avares://{logoPath.TrimStart('/', '\\')}";
-                    //}
-
-                    //item.Logo = new Uri(logoPath, UriKind.Absolute);
-
-                    //item.Logo = new Uri(action.Icon);// $"ms-appx:///{dir}{action.Icon}{ext}");
+							item.Logo = new Uri($"ms-appx:///{action.Icon}");
                 }
 				catch(Exception ex)
 				{

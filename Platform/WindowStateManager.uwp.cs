@@ -1,9 +1,5 @@
 ﻿#nullable enable
-using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
-using Microsoft.UI.Windowing;
-using Microsoft.UI.Xaml;
-using System;
 using Window = Avalonia.Controls.Window;
 
 namespace Microsoft.Maui.ApplicationModel

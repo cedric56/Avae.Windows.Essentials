@@ -126,55 +126,6 @@ namespace Microsoft.Maui.Media
 			return platform;
 		}
 
-#if ANDROID
-		/// <summary>
-		/// Captures a screenshot of the specified activity.
-		/// </summary>
-		/// <param name="screenshot">The object this method is invoked on.</param>
-		/// <param name="activity">The activity to capture.</param>
-		/// <returns>An instance of <see cref="IScreenshotResult"/> with information about the captured screenshot.</returns>
-		public static Task<IScreenshotResult> CaptureAsync(this IScreenshot screenshot, Android.App.Activity activity) =>
-			screenshot.AsPlatform().CaptureAsync(activity);
-
-		/// <summary>
-		/// Captures a screenshot of the specified view.
-		/// </summary>
-		/// <param name="screenshot">The object this method is invoked on.</param>
-		/// <param name="view">The view to capture.</param>
-		/// <returns>An instance of <see cref="IScreenshotResult"/> with information about the captured screenshot.</returns>
-		public static Task<IScreenshotResult?> CaptureAsync(this IScreenshot screenshot, Android.Views.View view) =>
-			screenshot.AsPlatform().CaptureAsync(view);
-
-#elif IOS || MACCATALYST
-		/// <summary>
-		/// Captures a screenshot of the specified window.
-		/// </summary>
-		/// <param name="screenshot">The object this method is invoked on.</param>
-		/// <param name="window">The window to capture.</param>
-		/// <returns>An instance of <see cref="IScreenshotResult"/> with information about the captured screenshot.</returns>
-		public static Task<IScreenshotResult> CaptureAsync(this IScreenshot screenshot, UIKit.UIWindow window) =>
-			screenshot.AsPlatform().CaptureAsync(window);
-
-		/// <summary>
-		/// Captures a screenshot of the specified view.
-		/// </summary>
-		/// <param name="screenshot">The object this method is invoked on.</param>
-		/// <param name="view">The view to capture.</param>
-		/// <returns>An instance of <see cref="IScreenshotResult"/> with information about the captured screenshot.</returns>
-		public static Task<IScreenshotResult?> CaptureAsync(this IScreenshot screenshot, UIKit.UIView view) =>
-			screenshot.AsPlatform().CaptureAsync(view);
-
-		/// <summary>
-		/// Captures a screenshot of the specified layer.
-		/// </summary>
-		/// <param name="screenshot">The object this method is invoked on.</param>
-		/// <param name="layer">The layer to capture.</param>
-		/// <param name="skipChildren">Specifies whether to include the child layers or not.</param>
-		/// <returns>An instance of <see cref="IScreenshotResult"/> with information about the captured screenshot.</returns>
-		public static Task<IScreenshotResult?> CaptureAsync(this IScreenshot screenshot, CoreAnimation.CALayer layer, bool skipChildren) =>
-			screenshot.AsPlatform().CaptureAsync(layer, skipChildren);
-
-#elif WINDOWS
 		/// <summary>
 		/// Captures a screenshot of the specified window.
 		/// </summary>
@@ -193,25 +144,6 @@ namespace Microsoft.Maui.Media
 		public static Task<IScreenshotResult?> CaptureAsync(this IScreenshot screenshot, UI.Xaml.UIElement element) =>
 			screenshot.AsPlatform().CaptureAsync(element);
 
-#elif TIZEN
-		/// <summary>
-		/// Captures a screenshot of the specified window.
-		/// </summary>
-		/// <param name="screenshot">The object this method is invoked on.</param>
-		/// <param name="window">The window to capture.</param>
-		/// <returns>An instance of <see cref="IScreenshotResult"/> with information about the captured screenshot.</returns>
-		public static Task<IScreenshotResult> CaptureAsync(this IScreenshot screenshot, Tizen.NUI.Window window) =>
-			screenshot.AsPlatform().CaptureAsync(window);
-
-		/// <summary>
-		/// Captures a screenshot of the specified view.
-		/// </summary>
-		/// <param name="screenshot">The object this method is invoked on.</param>
-		/// <param name="view">The view to capture.</param>
-		/// <returns>An instance of <see cref="IScreenshotResult"/> with information about the captured screenshot.</returns>
-		public static Task<IScreenshotResult?> CaptureAsync(this IScreenshot screenshot, Tizen.NUI.BaseComponents.View view) =>
-			screenshot.AsPlatform().CaptureAsync(view);
-#endif
 	}
 
 	/// <summary>
