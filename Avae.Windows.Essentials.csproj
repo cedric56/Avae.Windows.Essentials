@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <PackageId>Avae.Windows.Essentials</PackageId>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
     <Authors>cedricb</Authors>
     <Product>Avae.Windows.Essentials</Product>
     <Description>Portage of Microsoft.Maui.Essentials for Windows</Description>

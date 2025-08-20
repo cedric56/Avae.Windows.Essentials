@@ -17,14 +17,46 @@ namespace Microsoft.Maui.ApplicationModel
         [DllImport("user32.dll", CharSet = CharSet.Unicode)]
         static extern IntPtr SendMessage(IntPtr hWnd, int Msg, IntPtr wParam, ref COPYDATASTRUCT lParam);
 
+
         const int WM_COPYDATA = 0x004A;
 
         [StructLayout(LayoutKind.Sequential)]
-        public struct COPYDATASTRUCT
+        internal struct COPYDATASTRUCT
         {
             public IntPtr dwData;   // custom identifier
             public int cbData;      // size of data in bytes
             public IntPtr lpData;   // pointer to data
+        }
+
+        public static AppBuilder UseMauiEssentials(this AppBuilder builder)
+        {
+            Patch();
+            builder.AfterSetup(b =>
+            {
+                Register();
+                Window.GotFocusEvent.AddClassHandler(typeof(Window), (sender, args) =>
+                {
+                    var window = (Window)sender!;
+                    OnActivated(window);
+                });
+                Window.WindowOpenedEvent.AddClassHandler(typeof(Window), (sender, args) =>
+                {
+                    var window = (Window)sender!;
+                    if (!_windows.Contains(window))
+                    {
+                        _windows.Add(window);
+                        OnActivated(window);
+                    }
+                });
+                Window.WindowClosedEvent.AddClassHandler(typeof(Window), (sender, _) =>
+                {
+                    var window = (Window)sender!;
+                    _windows.Remove(window);
+                    if (_windows.Count > 0)
+                        OnActivated(_windows.Last());
+                });
+            });
+            return builder;
         }
 
         private static void Patch()
@@ -39,17 +71,20 @@ namespace Microsoft.Maui.ApplicationModel
                 foreach (Process p in processes)
                 {
                     if (p.Id != proc.Id)
-                    {
+                    {                        
                         var args = Environment.GetCommandLineArgs();
                         var arg = args.FirstOrDefault(a => a.StartsWith(AppActionsExtensions.AppActionPrefix));
                         if (arg != null)
                         {
+                            
                             SendMessage(p.MainWindowHandle, arg);
+                            proc.Kill();
+                            Environment.Exit(0);
+                            break;
                         }
                     }
                 }
             }
-
         }
 
         private static void SendMessage(IntPtr handle, string args)
@@ -66,11 +101,9 @@ namespace Microsoft.Maui.ApplicationModel
             SendMessage(handle, WM_COPYDATA, IntPtr.Zero, ref cds);
 
             Marshal.FreeHGlobal(lpData);
-
-            Environment.Exit(0);
         }
 
-        public static void Register()
+        private static void Register()
         {
             if (Application.Current!.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
@@ -115,32 +148,6 @@ namespace Microsoft.Maui.ApplicationModel
 
         static List<Window> _windows = new List<Window>();
 
-        public static void Initialize()
-        {
-            Patch();
-            Register();
-            Window.GotFocusEvent.AddClassHandler(typeof(Window), (sender, args) =>
-            {
-                var window = (Window)sender!;
-                OnActivated(window);
-            });
-            Window.WindowOpenedEvent.AddClassHandler(typeof(Window), (sender, args) =>
-            {
-                var window = (Window)sender!;
-                if (!_windows.Contains(window))
-                {
-                    _windows.Add(window);
-                    OnActivated(window);
-                }
-            });
-            Window.WindowClosedEvent.AddClassHandler(typeof(Window), (sender, _) =>
-            { 
-                var window = (Window)sender!;
-                _windows.Remove(window);
-                if (_windows.Count > 0)
-                    OnActivated(_windows.Last());
-            });
-        }
 
         /// <summary>
         /// Gets or sets the map service API key for this platform.

@@ -36,12 +36,11 @@ OR
 1. Initialize 
 
 ````
+ using Microsoft.Maui.ApplicationModel;
+
  public static AppBuilder BuildAvaloniaApp()
         => AppBuilder.Configure<App>()
-            .AfterSetup(builder =>
-            {
-                Microsoft.Maui.ApplicationModel.Platform.Initialize();
-            })
+            .UseMauiEssentials()
             .UsePlatformDetect()
             .WithInterFont()
             .LogToTrace();
