@@ -1,53 +1,117 @@
 ﻿using Microsoft.Maui.ApplicationModel;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Automation.Peers;
-using Microsoft.UI.Xaml.Media;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace Microsoft.Maui.Accessibility
 {
-	partial class SemanticScreenReaderImplementation : ISemanticScreenReader
-	{
-		public void Announce(string text)
-		{
-			throw new NotImplementedInReferenceAssemblyException();
-			//if (WindowStateManager.Default.GetActiveWindow() is not Window window)
-			//	return;
+    partial class SemanticScreenReaderImplementation : ISemanticScreenReader
+    {
+        [Flags]
+        public enum ProviderOptions
+        {
+            ClientSideProvider = 0x0001,
+            ServerSideProvider = 0x0002,
+            NonClientAreaProvider = 0x0004,
+            OverrideProvider = 0x0008,
+            ProviderOwnsSetFocus = 0x0010,
+            UseComThreading = 0x0020
+        }
 
-			//var peer = FindAutomationPeer(window.Content);
+        // AutomationNotificationKind (from UIA)
+        public enum AutomationNotificationKind
+        {
+            ItemAdded = 0,
+            ItemRemoved = 1,
+            ActionCompleted = 2,
+            ActionAborted = 3,
+            Other = 4
+        }
 
-			//// This GUID correlates to the internal messages used by UIA to perform an announce
-			//// You can extract it  by using accessibility insights to monitor UIA events
-			//// If you're curious how this works then do a google search for the GUID
-			//peer.RaiseNotificationEvent(
-			//	AutomationNotificationKind.ActionAborted,
-			//	AutomationNotificationProcessing.ImportantMostRecent,
-			//	text,
-			//	"270FA098-C644-40A2-A0BE-A9BEA1222A1E");
-		}
+        // AutomationNotificationProcessing
+        public enum AutomationNotificationProcessing
+        {
+            ImportantAll = 0,
+            ImportantMostRecent = 1,
+            All = 2,
+            MostRecent = 3,
+            CurrentThenMostRecent = 4
+        }
 
-		// This isn't great but it's the only way I've found to announce with WinUI.
-		// You have to locate a control that has an automation peer and then use that
-		// to perform the announce operation. This creates scenarios where the
-		// screen might not have any automation peers on it to use but in those cases
-		// you really shouldn't be using the announce API
-		static AutomationPeer FindAutomationPeer(DependencyObject depObj)
-		{
-			if (depObj != null)
-			{
-				for (int i = 0; i < VisualTreeHelper.GetChildrenCount(depObj); i++)
-				{
-					DependencyObject child = VisualTreeHelper.GetChild(depObj, i);
-					if (child is UIElement element && FrameworkElementAutomationPeer.FromElement(element) != null)
-					{
-						return FrameworkElementAutomationPeer.FromElement(element);
-					}
+        [ComImport]
+        [TypeLibType(256)]
+        [InterfaceType(1)]
+        [Guid("D6DD68D1-86FD-4332-8666-9ABEDEA2D24C")]
+        public interface IRawElementProviderSimple
+        {
+            [DispId(1610678272)]
+            ProviderOptions ProviderOptions
+            {
+                [MethodImpl(MethodImplOptions.InternalCall, MethodCodeType = MethodCodeType.Runtime)]
+                get;
+            }
 
-					var childItem = FindAutomationPeer(child);
-					if (childItem != null)
-						return childItem;
-				}
-			}
-			return null;
-		}
-	}
+            [MethodImpl(MethodImplOptions.InternalCall, MethodCodeType = MethodCodeType.Runtime)]
+            [return: MarshalAs(UnmanagedType.IUnknown)]
+            object GetPatternProvider([In] int patternId);
+
+            [MethodImpl(MethodImplOptions.InternalCall, MethodCodeType = MethodCodeType.Runtime)]
+            [return: MarshalAs(UnmanagedType.Struct)]
+            object GetPropertyValue([In] int propertyId);
+
+            [DispId(1610678275)]
+            IRawElementProviderSimple HostRawElementProvider
+            {
+                [MethodImpl(MethodImplOptions.InternalCall, MethodCodeType = MethodCodeType.Runtime)]
+                [return: MarshalAs(UnmanagedType.Interface)]
+                get;
+            }
+        }
+
+        [DllImport("UIAutomationCore.dll", CharSet = CharSet.Unicode)]
+        private static extern int UiaRaiseNotificationEvent(
+    IRawElementProviderSimple provider,
+    AutomationNotificationKind notificationKind,
+    AutomationNotificationProcessing notificationProcessing,
+    [MarshalAs(UnmanagedType.BStr)] string displayString,
+    [MarshalAs(UnmanagedType.BStr)] string activityId);
+
+        [DllImport("UIAutomationCore.dll")]
+        public static extern int UiaHostProviderFromHwnd(IntPtr hwnd, [MarshalAs(UnmanagedType.Interface)] out IRawElementProviderSimple provider);
+
+        public class SimpleNotificationProvider(IRawElementProviderSimple simple) : IRawElementProviderSimple
+        {
+            public ProviderOptions ProviderOptions => ProviderOptions.ServerSideProvider;
+
+            public object GetPatternProvider(int patternId) => null;
+
+            public object GetPropertyValue(int propertyId)
+            {
+                return null;
+            }
+
+            public IRawElementProviderSimple HostRawElementProvider
+            {
+                get
+                {
+                    return simple;
+                }
+            }
+        }
+        public void Announce(string text)
+        {
+            // Get HWND for your active window
+            IntPtr windowHwnd = WindowStateManager.Default.GetActiveWindowHandle(false);
+            if (windowHwnd == IntPtr.Zero)
+                return;
+
+            UiaHostProviderFromHwnd(windowHwnd, out IRawElementProviderSimple simple);
+
+            UiaRaiseNotificationEvent(
+                 new SimpleNotificationProvider(simple),
+                AutomationNotificationKind.ActionAborted,
+                AutomationNotificationProcessing.ImportantMostRecent,
+                text,
+                string.Empty);
+        }
+    }
 }

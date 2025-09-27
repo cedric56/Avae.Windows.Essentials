@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <PackageId>Avae.Windows.Essentials</PackageId>
-    <Version>1.0.2</Version>
+    <Version>1.0.3</Version>
     <Authors>cedricb</Authors>
     <Product>Avae.Windows.Essentials</Product>
     <Description>Portage of Microsoft.Maui.Essentials for Windows</Description>
@@ -23,6 +23,7 @@
 
   <ItemGroup>
     <PackageReference Include="Avalonia" Version="11.1.0" />
+    <!--<PackageReference Include="Interop.UIAutomationClient" Version="10.19041.0" />-->
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.7.250606001" />
     <PackageReference Include="Microsoft.Maui.Graphics" Version="6.0.300" />
   </ItemGroup>
