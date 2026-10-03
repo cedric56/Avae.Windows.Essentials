@@ -1,4 +1,4 @@
-[!WARNING]
+[WARNING]
 This repository will be merged into [`Avae.Essentials`](https://github.com/cedric56/Avae.Essentials) as soon as [`Avalonia.Controls.Maui.Essentials`](https://github.com/AvaloniaUI/Avalonia.Controls.Maui.Essentials) is ready.**
 
 # Avae.Windows.Essentials
