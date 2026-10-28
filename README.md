@@ -1,8 +1,3 @@
-> [!WARNING]
-> This repository will be merged into [`Avae.Essentials`](https://github.com/you/Avae.Essentials) as soon as [`Avalonia.Controls.Maui.Essentials`](https://github.com/AvaloniaUI/Avalonia.Controls.Maui.Essentials) and [`Maui.Labs.Essentials`](https://github.com/dotnet/maui-labs) are ready for browser.
->
-> Until then, `Avae.Windows.Essentials` remains the canonical source and will keep receiving fixes.
-
 # Avae.Windows.Essentials
 
 A port of Microsoft.Maui.Essentials tailored for Avalonia.Windows.
